@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}
+Publications
+{% endblock %}
+
+
+{% block content %}
+
+
+
+<div class="posts">
+    {% if (not author) and (not post_type_name) and (not post_category_name) and (not all_posts) %}
+        No publications
+    
+    {% else %}
+    {% if author and current_user != author %}
+        <p>Author: {{ author.username }}</p>
+    {% elif current_user == author %}
+        <h3>Your publications</h3>
+    {% endif %}
+
+    {% if post_type_name %}
+        <p>Filter Post Type: {{ post_type_name }}</p>
+    {% endif %}
+    
+    {% if post_category_name %}
+        <p>Post Category: {{ post_category_name }}</p>
+    {% endif %}
+
+
+    {% for post in all_posts %}
+        <div class="post">
+            <h5><a href="/posts/{{ post.alternative_id }}"><i>{{ post.title }}</i></a></h5>
+            <p>{{ post.body[:50] }}....</p>
+            <p><i>Date: {{ post.posted_at.strftime('%Y-%m-%d') }}</i></p>
+            {% if post.confirmed_for_deployment %}
+            Confirmed for deployment
+            {% endif %}
+            {% if post.confirmed_for_insights %}
+            Confirmed for insights
+            {% endif %}
+            <p>Originally By: 
+                <a href="/users/{{ post.original_author.alternative_id }}">
+                    {{ post.original_author.username }}
+                </a>
+            </p>
+        </div>
+    {% endfor %}
+
+    {% endif %}
+
+
+
+
+
+
+</div>
+
+
+{% endblock %}

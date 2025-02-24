@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}
+Login
+{% endblock %}
+
+
+
+
+{% block content %}
+
+<form action="/auth/login" method="post">
+    <input type="text" name="username" id="username" placeholder="Enter a unique username...">
+    <input type="password" name="password" id="password" placeholder="Security is the key!">
+    <label for="remember_me">Would you like us to remember you? </label>
+    <input type="checkbox" name="remember_me" id="remember_me">
+    <input type="submit" value="Login">
+    <span>Not member? <a href="{{ url_for('auth.register') }}">Register</a></span>
+</form>
+
+{% endblock %}

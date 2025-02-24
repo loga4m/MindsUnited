@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}
+Request Management
+{% endblock %}
+
+
+{% block content %}
+
+<h3>Request Manager</h2>
+<h5>Outgoing Requests</h5>
+
+<table>
+    <thead>
+        <tr>
+            <th>Calling username</th>
+            <th>Receiving representative</th>
+            <th>Request object</th>
+            <th>Created at</th>
+            <th>Closed at at</th>
+            <th>Confirmed</th>
+            <th>Linked repr request</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for request_ in current_user.requests %}
+
+        <tr>
+            <td>current_user.username</td>
+            <td>
+                <a href="/users/{{ request_.receiving_representative.alternative_id }}">
+                    {{ request_.receiving_representative.username }}
+                </a>
+            </td>
+            <td>
+                <a href="/posts/{{ request_.request_object.alternative_id }}">Post# {{ request_.request_object.alternative_id[:3] }}</a>
+            </td>
+            <td>
+                {{ request_.created_at.strftime("%Y-%m-%d, %H : %m") }}
+            </td>
+            <td>
+                {% if request_.closed_at %}
+                {{ request_.created_at.strftime("%Y-%m-%d, %H : %m") }}
+                {% else %}
+                Ongoing
+                {% endif %}
+            </td>
+            <td>
+                {{ request_.confirmed }}
+            </td>
+            <td>
+                {% if request_.linked_repr_request %}
+                Created
+                {% else %}
+                Not created
+                {% endif %}
+            </td>
+            <td><a href="/requests/user_req/{{ request_.id }}/delete">Del</a></td>
+            <!-- TODO: delete operation -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<br>
+{% if current_user.type == "representative" %}
+
+<h5>Incoming requests</h5>
+
+<table>
+    <thead>
+        <th>Calling user</th>
+        <th>Receiving repsentative</th>
+        <th>Request object</th>
+        <th>Created at</th>
+        <th>Closed at</th>
+        <th>Approved</th>
+        <th>Approve</th>
+        <th>Delete</th>
+    </thead>
+    <tbody>
+        <tr>
+            {% for inc_request in current_user.incoming_requests %}
+            <td>
+                <a href="/users/{{ inc_request.calling_user.alternative_id }}">
+                    {{ inc_request.calling_user.username }}
+                </a>
+            </td>
+            <td>
+                <a href="/users/{{ current_user.alternative_id }}">
+                    {{ current_user.username }}
+                </a>
+            </td>
+            <td>
+                <a href="/posts/{{ inc_request.request_object.alternative_id }}">Post# {{ inc_request.request_object.alternative_id[:3] }}</a>
+            </td>
+            <td>
+                {{ inc_request.created_at.strftime("%Y-%m-%d, %H : %m") }}
+            </td>
+            <td>
+                {% if inc_request.closed_at %}
+                    {{ inc_request.created_at.strftime("%Y-%m-%d, %H : %m") }}
+                {% else %}
+                    Ongoing
+                {% endif %}
+            </td>
+            <td>
+                {{ inc_request.confirmed }}
+            </td>
+            <td>
+                <a href="/requests/create/repr_req">Approve</a>
+            </td>
+            <td>
+                <a href="/requests/user_req/{{ inc_request.id }}/delete">Del</a>
+            </td>
+
+            {% endfor %}
+        </tr>
+    </tbody>
+</table>
+
+{% endif %}
+
+
+{% endblock %}

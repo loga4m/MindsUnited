@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        div, form, h3, h4, h5 {
+            margin-top: 20px;
+            padding: 15px 30px;
+            border: rgb(119, 92, 2) 2px solid;
+        }
+        input, select, textarea {
+            display: block;
+            margin-bottom: 20px;
+
+        }
+        input[type="submit"], button {
+            display: block;
+            background: rgb(136, 120, 108);
+            color: white;
+            font-size: 14px;
+            padding: 5px 25px;
+            border: 2px solid black;
+            border-radius: 5px;
+            margin: 10px 0px;
+            cursor: pointer;
+        }
+
+        select {
+            display: block;
+        }
+
+       
+        table {
+            width: 100%; /* Make the table stretch */
+            border-collapse: collapse; /* Remove space between borders */
+        }
+        
+        th, td {
+            padding: 10px; /* Add space inside cells */
+            border: 1px solid #ddd; /* Add border to cells */
+            text-align: left; /* Align text to the left */
+        }
+        
+        th {
+            background-color: #cfdfbe; /* Light gray background for headers */
+            font-weight: bold;
+        }
+
+        textarea {
+            display: block;
+            width: 90%;
+            height: 60px;
+        }
+        
+        #body {
+            height: 300px;
+        }
+
+        .message {
+            background-color: rgb(212, 232, 212);
+            top: 10;
+        }
+        button a {
+            color: white;
+            text-decoration: none;
+        }
+
+    </style>
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <div class="sidebar">
+        <p><a href="{{ url_for('home') }}">MindsUnited</a></p>
+        {% block sidebar %}
+
+        {% endblock %}
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="message">
+            {{ messages[0] }}
+        </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %} {% endblock %}
+</body>
+</html>

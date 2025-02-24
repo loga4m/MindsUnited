@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}
+
+{{ post.title }}
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="post">
+
+    <h1>{{ post.title }}</h1>
+    {% if not is_author_viewing %}
+
+    <p>Original author: <a href="/users/{{ post.original_author.alternative_id }}">{{ post.original_author.username }}</a></p>
+
+    {% endif %}
+    {% if post.contributing_authors %}
+    <p>Contributing authors:</p>
+    <ul>
+        {% for author in post.contributing_authors %}
+
+            <li><a href="/users/{{ author.alternative_id }}">{{ author.username }}</a></li>
+
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <p>{{ post.body }}</p>
+
+    <div class="post-footer">
+        <p>Posted at: {{ post.created_at.strftime("%Y-%m-%d") }}</p>
+        <span class="static-button">Upvotes: {{ post.upvotes }}</span>
+        <span class="static-button">
+            <a href="/posts?post_type={{ post.post_type.alternative_id }}">{{ post.post_type.name }}</a>
+        </span>
+
+        {% for category in post.post_categories %}
+
+            <span class="static-button">
+                <a href="/posts?post_category={{ category.alternative_id }}">{{ category.name }}</a>
+            </span>
+
+        {% endfor %}
+
+    </div>
+    {% if not post.outgoing_request %}
+        <button><a href="/requests/create/user_req?source_id={{ post.alternative_id }}">Create Request</a></button>
+
+    {% else %}
+        <p>Request status: {{ post.outgoing_request.confirmed }}</p>
+    {% endif %}
+
+
+</div>
+
+{% if not post.private %}
+
+<div class="discussion">
+    <h3>Discussion</h3>
+    {% for comment in comments %}
+
+    <div class="comment" id="comment-{{ comment.id }}">
+       <a href="/users/{{ comment.author.alternative_id }}">{{ comment.author.username }}</a>
+       <p>{{ comment.text }}</p>
+       <p>Upvotes: {{ comment.upvotes }}</p>
+       {% if comment.author.alternative_id == current_user.alternative_id %}
+        <a href="/posts/{{ post.alternative_id }}/comments/{{ comment.id }}/delete">Delete</a>
+       {% endif %}
+    </div>
+
+    {% endfor %}
+
+    <form action="/posts/{{ post.alternative_id }}/add-comment" method="post">
+        <textarea id="text" name="text" required></textarea>
+        <input type="submit" value="Comment">
+    </form>
+
+</div>
+
+
+{% endif %}
+
+
+{% endblock %}

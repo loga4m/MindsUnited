@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}
+
+{% if current_user.alternative_id == user_short_data.alternative_id %}
+    Your Profile
+{% else %}
+    {{ user_short_data.username }}
+{% endif %}
+
+{% endblock %}
+
+{% block sidebar %}
+    <a href="{{ url_for('posts.ViewPosts') }}">Posts</a>
+    <a href="{{ url_for('auth.logout') }}">| Logout</a>
+    <a href="/posts?post_type=Issues">Issues Board</a>
+    <!-- <a href="/posts?">Insights</a> -->
+    <!-- <a href="{url_for('posts.home') }}">Delivered Solutions</a> -->
+{% endblock %}
+
+{% block content %}
+<div class="user-card">
+    <div class="user-card-info">
+        <p>{{ user_short_data.full_name }}</p>
+        <p>{{ user_short_data.username }}</p>
+        <p>{{ user_short_data.email }}</p>
+    </div>
+    <div class="user-card-links">
+        <h3>
+            {% if is_this_current_user %}
+                My
+            {% endif %} 
+            Publications: 
+        </h3>
+        <ul>
+            {% for post_type in post_types %}
+                <li>
+                    <a href="/posts?author_id={{ user_short_data.alternative_id }}&post_type={{ post_type }}">
+                        {% if is_this_current_user %}
+                            My
+                        {% endif %} 
+                        {{ post_type }}
+                    </a>
+                </li>
+            {% endfor %}
+            {% if is_this_current_user %}
+                <li><a href="/posts/add-post">New Publication</a></li>
+            {% endif %}
+        </ul>
+        <a href="/requests">My Requests</a>
+    </div>
+</div>
+<div class="statistics">
+    <h3>Statistics:</h3>
+    <p>Number of publications: {{ statistics.publications }}</p>
+    <p>Number of publications confirmed to delivery: {{ statistics.confirmed_for_deployment }}</p>
+    <p>Number of publications confirmed to insights:  {{ statistics.confirmed_for_insights }}</p>
+</div>
+
+{% endblock %}

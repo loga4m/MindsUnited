@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+
+{% block title %}
+New Publication
+{% endblock %}
+
+
+{% block content%}
+
+<form action="/posts/add-post" method="post">
+
+    <!-- Post Title -->
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" required>
+
+    <!-- Post Body -->
+    <label for="body">Body:</label>
+    <textarea id="body" name="body" required></textarea>
+
+    <label for="private">Is private:</label>
+    <input type="checkbox" name="private" id="private">
+
+    <!-- Post Type (Single Selection) -->
+    <label for="post_type">Post Type:</label>
+    <select id="post_type" name="post_type" required>
+        {% for post_type in post_types %}
+        <option value="{{ post_type.id }}">{{ post_type.name }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Post Categories (Multiple Selection) -->
+    <label for="post_categories">Post Categories:</label>
+    <select id="post_categories" name="post_categories" multiple required>
+        {% for category in post_categories %}
+        <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- Submit Button -->
+    <button type="submit">Publish</button>
+</form>
+
+
+{% endblock %}
