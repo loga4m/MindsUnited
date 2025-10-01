@@ -1,7 +1,5 @@
 # MindsUnited - Database Schema Documentation
 
-[YouTube Demo](https://www.youtube.com/watch?v=v6z7UJE8i2I)
-
 ## Overview
 
 MindsUnited is a collaborative platform built as part of Sustainable Development Goals with focus on fostering international problem solving, knowledge sharing, and innovation. The system implementes hierarchical model of boards, board members, representatives, and users. User publish their ideas, solutions to problems in categories of SDG, discuss with others, browse current problems, etc. To facilitate a solution deployment for a real-world problem, the system implements a hierarchical request workflow where users submit their solutions for approval to representatives who then escalate them to boards for review.
