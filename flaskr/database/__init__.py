@@ -14,7 +14,8 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     DateTime,
-    Text
+    Text,
+    UniqueConstraint
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -43,11 +44,15 @@ class Board(db.Model):
     __tablename__ = "board_table"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    established_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    established_at: Mapped[datetime] = mapped_column(
+            DateTime, 
+            default=lambda: datetime.now(timezone.utc)
+    )
 
     members: Mapped[List[BoardMember]] = relationship(back_populates="board")
     # TODO: 
-    incoming_requests: Mapped[List[RepresentativeRequest]] = relationship(back_populates="board")
+    incoming_requests: Mapped[List[RepresentativeRequest]] = relationship(
+            back_populates="board")
 
 
 
@@ -94,7 +99,10 @@ class User(UserMixin, db.Model):
     profession: Mapped[str] = mapped_column(String(30))
     age: Mapped[Optional[int]]
     password_hash: Mapped[str] = mapped_column(String)
-    registered_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    registered_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        default=lambda: datetime.now(timezone.utc)
+    )
 
     authored_posts: Mapped[List[Post]] = relationship(
         back_populates="original_author"
@@ -164,7 +172,7 @@ class Representative(User):
     __tablename__ = "representative_table"
     id: Mapped[int] = mapped_column(ForeignKey("user_table.id"), primary_key=True)
     incoming_requests: Mapped[List[UserRequest]] = relationship(back_populates="receiving_representative")
-    requests: Mapped[List[RepresentativeRequest]] = relationship(back_populates="representative")
+    repr_requests: Mapped[List[RepresentativeRequest]] = relationship(back_populates="representative")
 
     # TODO: requests relationship: Done
     inserted_insights: Mapped[Insight] = relationship(back_populates="inserting_representative")
@@ -207,9 +215,13 @@ class RepresentativeRequest(Request):
     calling_user_request_id: Mapped[int] = mapped_column(ForeignKey("user_request_table.id"))
     calling_user_request: Mapped[UserRequest] = relationship(back_populates="linked_repr_request")
     representative_id: Mapped[int] = mapped_column(ForeignKey("representative_table.id"))
-    representative: Mapped[Representative] = relationship(back_populates="requests")
+    representative: Mapped[Representative] = relationship(back_populates="repr_requests")
     board_id: Mapped[int] = mapped_column(ForeignKey("board_table.id"))
     board: Mapped[Board] = relationship(back_populates="incoming_requests")
+
+    __table_args__ = (
+        UniqueConstraint("calling_user_request_id", "representative_id", name="user_req_repr_id_uniq"),
+    )
 
 
 

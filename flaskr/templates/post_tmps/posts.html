@@ -35,11 +35,13 @@ Publications
             <p>{{ post.body[:50] }}....</p>
             <p><i>Date: {{ post.posted_at.strftime('%Y-%m-%d') }}</i></p>
             {% if post.confirmed_for_deployment %}
-            Confirmed for deployment
+                Confirmed for deployment
             {% endif %}
+            
             {% if post.confirmed_for_insights %}
-            Confirmed for insights
+                Confirmed for insights
             {% endif %}
+            
             <p>Originally By: 
                 <a href="/users/{{ post.original_author.alternative_id }}">
                     {{ post.original_author.username }}

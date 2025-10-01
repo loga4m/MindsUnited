@@ -10,7 +10,12 @@ from flask import (
 from flask_login import login_required, current_user
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
-from flaskr.database import db, User, Post, PostDiscussion, PostComment, PostCategory, PostType
+from flaskr.database import (
+        db, User, Post, 
+        PostDiscussion, 
+        PostComment, 
+        PostCategory, PostType
+)
 
 
 posts_bp = Blueprint("posts", __name__, url_prefix="/posts")
@@ -24,7 +29,6 @@ def ViewPosts():
     print(post_type_name)
     post_category_name = request.args.get("post_category", None)
     post_types = []
-    post_categories = []
 
 
     if post_type_name:
@@ -60,7 +64,6 @@ def ViewPosts():
             (Post.private == False) | (Post.original_author == current_user)
         )
 
-    print(post_types)
     all_posts = [post.get_public_info(short=True) for post in db.session.execute(base_query).scalars().all()]
 
     return render_template(
@@ -127,7 +130,6 @@ def AddPost():
             print(post_type)
             post.post_type = post_type
 
-                # post.post_type = post_type
 
             for category_id in categories:
                 category_id = int(category_id)
@@ -170,7 +172,7 @@ def ViewPost(post_id: str):
     post: Post = db.one_or_404(
         db.select(Post).filter_by(alternative_id=post_id)
     )
-    print(post)
+    
     is_author_viewing = False
 
     if current_user == post.original_author:

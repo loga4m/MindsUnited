@@ -7,6 +7,16 @@ Request Management
 
 {% block content %}
 
+
+<!-- 
+
+## TODO: Merge these tables into one using loop as both request types share
+         a lot in common, and then handle specific characterists by type
+         checking.
+
+-->
+
+
 <h3>Request Manager</h2>
 <h5>Outgoing Requests</h5>
 
@@ -27,7 +37,7 @@ Request Management
         {% for request_ in current_user.requests %}
 
         <tr>
-            <td>current_user.username</td>
+            <td>{{ current_user.username }}</td>
             <td>
                 <a href="/users/{{ request_.receiving_representative.alternative_id }}">
                     {{ request_.receiving_representative.username }}
@@ -79,8 +89,8 @@ Request Management
         <th>Delete</th>
     </thead>
     <tbody>
+        {% for inc_request in current_user.incoming_requests %}
         <tr>
-            {% for inc_request in current_user.incoming_requests %}
             <td>
                 <a href="/users/{{ inc_request.calling_user.alternative_id }}">
                     {{ inc_request.calling_user.username }}
@@ -108,16 +118,82 @@ Request Management
                 {{ inc_request.confirmed }}
             </td>
             <td>
-                <a href="/requests/create/repr_req">Approve</a>
+              <a href="/requests/create/repr_req?user_req_id={{ inc_request.id }}">Approve</a>
             </td>
             <td>
                 <a href="/requests/user_req/{{ inc_request.id }}/delete">Del</a>
             </td>
 
-            {% endfor %}
         </tr>
+        {% endfor %}
     </tbody>
 </table>
+
+<h5>Outgoing representative requests</h5>
+
+<table>
+    <thead>
+        <th>Request ID</th>
+        <th>Calling user request ID</th>
+        <th>Calling representative</th>
+        <th>Calling user</th>
+        <th>Receiving Board</th>
+        <th>Request object</th>
+        <th>Created at</th>
+        <th>Closed at</th>
+        <th>Approved</th>
+        <th>Delete</th>
+    </thead>
+    <tbody>
+        {% for repr_req in current_user.repr_requests%}
+        <tr>
+            <td>
+              {{ repr_req.id }}
+            </td>
+            <td>
+              {{ repr_req.calling_user_request.id }}
+            </td>
+            <td>
+              <a href="/users/{{ current_user.alternative_id }}">
+                  {{ current_user.username }}
+              </a>
+            </td>
+            <td>
+              <a href="/users/{{ repr_req.calling_user_request.calling_user.alternative_id }}">
+                  {{ repr_req.calling_user_request.calling_user.username }}
+              </a>
+            </td>
+            <td>
+              {{ repr_req.board_id }}
+            </td>
+            <td>
+                <a href="/posts/{{ repr_req.calling_user_request.request_object.alternative_id }}">
+                  Post# 
+                  {{ repr_req.calling_user_request.request_object.alternative_id[:3] }}
+                </a>
+            </td>
+            <td>
+                {{ repr_req.created_at.strftime("%Y-%m-%d, %H : %m") }}
+            </td>
+            <td>
+                {% if repr_req.closed_at %}
+                    {{ repr_req.created_at.strftime("%Y-%m-%d, %H : %m") }}
+                {% else %}
+                    Ongoing
+                {% endif %}
+            </td>
+            <td>
+                {{ repr_req.confirmed }}
+            </td>
+            <td>
+                <a href="/requests/repr_req/{{ repr_req.id }}/delete">Del</a>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 
 {% endif %}
 

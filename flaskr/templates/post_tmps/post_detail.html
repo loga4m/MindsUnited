@@ -68,7 +68,7 @@
        <p>{{ comment.text }}</p>
        <p>Upvotes: {{ comment.upvotes }}</p>
        {% if comment.author.alternative_id == current_user.alternative_id %}
-        <a href="/posts/{{ post.alternative_id }}/comments/{{ comment.id }}/delete">Delete</a>
+        <button><a href="/posts/{{ post.alternative_id }}/comments/{{ comment.id }}/delete">Delete</a></button>
        {% endif %}
     </div>
 

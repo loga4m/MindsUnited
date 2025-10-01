@@ -32,6 +32,9 @@
             Publications: 
         </h3>
         <ul>
+            <li>
+                <a href="/posts?author_id={{ user_short_data.alternative_id }}">My All Publications</a>
+            </li>
             {% for post_type in post_types %}
                 <li>
                     <a href="/posts?author_id={{ user_short_data.alternative_id }}&post_type={{ post_type }}">
