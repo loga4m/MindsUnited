@@ -1,0 +1,155 @@
+erDiagram
+  board_table {
+    INTEGER id PK
+    DATETIME established_at
+  }
+
+  post_user_association_table {
+    INTEGER post_id FK "nullable"
+    INTEGER user_id FK "nullable"
+  }
+
+  post_contributed_authors_table {
+    INTEGER post_id FK "nullable"
+    INTEGER user_id FK "nullable"
+  }
+
+  user_table {
+    INTEGER id PK
+    INTEGER age "nullable"
+    VARCHAR alternative_id
+    VARCHAR(50) email UK
+    VARCHAR(40) full_name
+    VARCHAR password_hash
+    VARCHAR(30) profession
+    DATETIME registered_at
+    VARCHAR type
+    VARCHAR(20) username UK
+  }
+
+  board_member_table {
+    INTEGER id PK,FK
+    INTEGER board_id FK
+  }
+
+  representative_table {
+    INTEGER id PK,FK
+  }
+
+  user_request_table {
+    INTEGER id PK
+    INTEGER calling_user_id FK
+    INTEGER receiving_representative_id FK
+    DATETIME closed_at "nullable"
+    BOOLEAN confirmed
+    DATETIME created_at
+  }
+
+  representative_request {
+    INTEGER id PK
+    INTEGER board_id FK
+    INTEGER calling_user_request_id FK
+    INTEGER representative_id FK
+    DATETIME closed_at "nullable"
+    BOOLEAN confirmed
+    DATETIME created_at
+  }
+
+  post_type_table {
+    INTEGER id PK
+    VARCHAR(20) name
+  }
+
+  post_category_association_table {
+    INTEGER post_category_id FK "nullable"
+    INTEGER post_id FK "nullable"
+  }
+
+  post_category_table {
+    INTEGER id PK
+    VARCHAR(20) name
+  }
+
+  post_to_post_association_table {
+    INTEGER linked_post_id FK "nullable"
+    INTEGER post_id FK "nullable"
+  }
+
+  post_table {
+    INTEGER id PK
+    INTEGER original_author_id FK
+    INTEGER outgoing_requet_id FK "nullable"
+    INTEGER post_type_id FK
+    VARCHAR alternative_id
+    TEXT body
+    BOOLEAN confirmed_for_deployment
+    BOOLEAN confirmed_for_insights
+    DATETIME created_at
+    BOOLEAN private
+    VARCHAR(100) title
+    DATETIME updated_at
+    INTEGER upvotes
+  }
+
+  discussion_table {
+    INTEGER id PK
+    INTEGER post_id FK
+    DATETIME created_at
+  }
+
+  board_discussion_table {
+    INTEGER id PK
+    DATETIME created_at
+    TEXT topic
+  }
+
+  post_comment {
+    INTEGER id PK
+    INTEGER author_id FK
+    INTEGER post_discussion_id FK
+    TEXT text
+    INTEGER upvotes
+  }
+
+  board_discussion_comment {
+    INTEGER id PK
+    INTEGER author_id FK
+    INTEGER board_discussion_id FK
+    TEXT text
+    INTEGER upvotes
+  }
+
+  insights_table {
+    INTEGER id PK
+    INTEGER inserting_representative_id FK
+    INTEGER source_post_id FK
+    TEXT ai_tuned_text
+    DATETIME created_at
+  }
+
+  user_table ||--o{ post_user_association_table : user_id
+  post_table ||--o{ post_user_association_table : post_id
+  user_table ||--o{ post_contributed_authors_table : user_id
+  post_table ||--o{ post_contributed_authors_table : post_id
+  user_table ||--o{ board_member_table : id
+  board_table ||--o{ board_member_table : board_id
+  user_table ||--o{ representative_table : id
+  user_table ||--o{ user_request_table : calling_user_id
+  representative_table ||--o{ user_request_table : receiving_representative_id
+  user_request_table ||--o{ representative_request : calling_user_request_id
+  representative_table ||--o{ representative_request : representative_id
+  board_table ||--o{ representative_request : board_id
+  post_category_table ||--o{ post_category_association_table : post_category_id
+  post_table ||--o{ post_category_association_table : post_id
+  post_table ||--o{ post_to_post_association_table : post_id
+  post_table ||--o{ post_to_post_association_table : linked_post_id
+  user_table ||--o{ post_table : original_author_id
+  post_type_table ||--o{ post_table : post_type_id
+  user_request_table ||--o{ post_table : outgoing_requet_id
+  post_table ||--o{ discussion_table : post_id
+  discussion_table ||--o{ post_comment : post_discussion_id
+  user_table ||--o{ post_comment : author_id
+  board_discussion_table ||--o{ board_discussion_comment : board_discussion_id
+  user_table ||--o{ board_discussion_comment : author_id
+  representative_table ||--o{ insights_table : inserting_representative_id
+  post_table ||--o{ insights_table : source_post_id
