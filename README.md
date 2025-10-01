@@ -2,13 +2,15 @@
 
 ## Overview
 
-MindsUnited is a collaborative platform enabling users to publish content, create requests through representatives, and manage board discussions. The system implements a hierarchical request workflow where users submit requests to representatives, who then escalate them to boards for review.
+MindsUnited is a collaborative platform built as part of Sustainable Development Goals with focus on fostering international problem solving, knowledge sharing, and innovation. The system impleentes hierarchical model of boards, board members, representatives, and users. User publish their ideas, solutions to problems in categories of SDG, discuss with others, browse current problems, etc. To facilitate a solution deployment for a real-world problem, the system implements a hierarchical request workflow where users submit their solutions for approval to representaties who then escalate them to boards for review.
+
+Furthermore, the system acts as a registry of solutions and insights. In particular, the insights part, not implemented in this version, aims to integrate AI which analyzes users' posts and creates insights for later use.
 
 ## Architecture Pattern
 
 - **ORM**: SQLAlchemy with Flask-SQLAlchemy
 - **Inheritance**: Single Table Inheritance (STI) for User hierarchy
-- **Relationships**: Many-to-many associations via junction tables
+- **Relationships**: Self-referential and many-to-many associations via junction tables
 - **ID Strategy**: Auto-incrementing primary keys + UUID alternative IDs for public exposure
 
 ---
@@ -17,7 +19,7 @@ MindsUnited is a collaborative platform enabling users to publish content, creat
 
 ### User Hierarchy
 
-The system implements polymorphic user types using SQLAlchemy's joined table inheritance.
+The system implements polymorphic user types using [SQLAlchemy's joined table inheritance](https://docs.sqlalchemy.org/en/20/orm/inheritance.html#joined-table-inheritance).
 
 #### `user_table` (Base)
 **Purpose**: Core user entity with shared attributes
@@ -76,7 +78,7 @@ The system implements polymorphic user types using SQLAlchemy's joined table inh
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
-| `id` | INTEGER | PK | Board identifier |
+| `id` | INTEGE   R | PK | Board identifier |
 | `established_at` | DATETIME | Default: UTC now | Creation timestamp |
 
 **Relationships**:
@@ -142,8 +144,8 @@ The system implements polymorphic user types using SQLAlchemy's joined table inh
 
 ### Discussion System
 
-#### `discussion_table` (PostDiscussion)
-**Purpose**: Discussion thread for each post
+#### `discussion_table` (PostDiscussion, inherits from abstract Discussion class)
+**Purpose**: Discussion for each post
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -156,7 +158,7 @@ The system implements polymorphic user types using SQLAlchemy's joined table inh
 - `post_comments` → PostComment (1:N)
 
 #### `board_discussion_table`
-**Purpose**: Board-specific discussion threads
+**Purpose**: Discussion threads in boards
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -166,6 +168,11 @@ The system implements polymorphic user types using SQLAlchemy's joined table inh
 
 **Relationships**:
 - `board_discussion_comments` → BoardDiscussionComment (1:N)
+
+## Commenting
+
+#### `Comment` abstract class
+**Purpose**: Serve as parent class for inheritance specialized comment models. Uses `@declared_attr` for dynamically providing fields for inheriting models.
 
 #### `post_comment`
 **Purpose**: Comments on post discussions
@@ -200,7 +207,7 @@ The system implements a hierarchical approval workflow:
 2. **Representative → Board** (RepresentativeRequest)
 
 #### `user_request_table`
-**Purpose**: Initial user requests to representatives
+**Purpose**: User requests for representatives
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -217,10 +224,10 @@ The system implements a hierarchical approval workflow:
 - `request_object` → Post (1:1)
 - `linked_repr_request` → RepresentativeRequest (1:1)
 
-**Load Balancing**: Representatives are auto-assigned based on minimum incoming request count.
+**Load Balancing**: A representative with minimum current load is auto-assigned.
 
 #### `representative_request`
-**Purpose**: Representative escalations to boards
+**Purpose**: Representative escalations (requests) to a board
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -233,13 +240,13 @@ The system implements a hierarchical approval workflow:
 | `closed_at` | DATETIME | Nullable | Closure timestamp |
 
 **Constraints**:
-- Unique constraint on `(calling_user_request_id, representative_id)`
+- Unique constraint on `(calling_user_request_id, representative_id)` to avoid duplication
 
-**Load Balancing**: Boards are auto-assigned based on minimum incoming request count.
+**Load Balancing**: A board with minimum current load is auto-assigned.
 
 ---
 
-## AI Integration
+## AI Integration (not implemented)
 
 #### `insights_table`
 **Purpose**: AI-processed content insights
@@ -259,7 +266,7 @@ The system implements a hierarchical approval workflow:
 ## Junction Tables
 
 ### `post_user_association_table`
-**Purpose**: Generic user-post associations (future use)
+**Purpose**: Generic user-post associations (future use, not needed now)
 
 | Column | Type | Constraints |
 |--------|------|-------------|
@@ -298,12 +305,12 @@ The system implements a hierarchical approval workflow:
 
 ### 1. **UUID Public IDs**
 - Internal integer PKs for performance
-- UUIDs (`alternative_id`) in URLs prevent enumeration attacks
+- UUIDs (`alternative_id`) in URLs for safety
 
 ### 2. **Polymorphic User Types**
-- Single table inheritance via `type` discriminator
-- Joined inheritance for specialized attributes
+- Joined Table Inheritance with `type` discriminator
 - Enables shared authentication/authorization logic
+- Reduces code duplication
 
 ### 3. **Request Workflow**
 ```
@@ -311,6 +318,9 @@ User → UserRequest → Representative → RepresentativeRequest → Board
 ```
 - Load-balanced assignment at each tier
 - Status tracking via `confirmed` and `closed_at`
+- **Logic**:
+    - If representative approves a UserRequest, it only creates RepresentativeRequest
+    - A post can be `confirmed` only when RepresentativeRequest gets approval from a board
 
 ### 4. **Soft Ownership**
 - `original_author` = primary creator
@@ -320,7 +330,7 @@ User → UserRequest → Representative → RepresentativeRequest → Board
 ### 5. **Approval Gates**
 - `confirmed_for_deployment`: Ready for production
 - `confirmed_for_insights`: Approved for AI processing
-- Prevents premature content exposure
+- Enables thorough review before deployment and AI processing
 
 ---
 
@@ -336,13 +346,8 @@ User → UserRequest → Representative → RepresentativeRequest → Board
 ## Scalability Notes
 
 1. **Load Balancing**: Auto-assignment prevents representative/board overload
-2. **Indexes Recommended**:
-   - `user_table.alternative_id`, `user_table.username`, `user_table.email`
-   - `post_table.alternative_id`, `post_table.created_at`
-   - `user_request_table.receiving_representative_id`, `user_request_table.confirmed`
-   - `representative_request.board_id`, `representative_request.confirmed`
-
-3. **Pagination**: Implement for posts, requests, comments
+2. **Indexes Needed**
+3. **Pagination Needed**
 
 ---
 
@@ -371,32 +376,6 @@ erDiagram
     USER_REQUEST ||--|| REPRESENTATIVE_REQUEST : "escalates to"
 ```
 
----
-
-## Sample Queries
-
-### Get user's approved posts
-```python
-Post.query.filter_by(
-    original_author_id=user.id,
-    confirmed_for_deployment=True
-).all()
-```
-
-### Find representative with minimum load
-```python
-Representative.query.order_by(
-    func.count(Representative.incoming_requests)
-).first()
-```
-
-### Retrieve post discussion thread
-```python
-PostDiscussion.query.filter_by(post_id=post.id).one()
-```
-
----
-
 **Version**: 1.0  
 **Last Updated**: 2025-10-01  
-**Database**: SQLite (development) | PostgreSQL (recommended production)
+**Database**: SQLite (development)
